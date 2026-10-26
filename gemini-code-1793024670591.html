@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>hooks&loops | Minimal Crochet Studio</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandpink: '#FFD1DC',
+                        brandlavender: '#E6E6FA',
+                        brandmint: '#D8F3DC',
+                        brandpeach: '#FFE5D9',
+                        brandyellow: '#FEF9E7',
+                        charcoal: '#2D2B29',
+                        mutedtaupe: '#7D756D',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #FFFDF9;
+            color: #2D2B29;
+            -webkit-tap-highlight-color: transparent;
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FFFDF9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FFD1DC;
+            border-radius: 3px;
+        }
+
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floatSlow 6s ease-in-out infinite;
+        }
+
+        @keyframes knitInterlace {
+            0% { transform: rotate(0deg) scale(1); opacity: 0.4; }
+            50% { transform: rotate(180deg) scale(1.15); opacity: 1; }
+            100% { transform: rotate(360deg) scale(1); opacity: 0.4; }
+        }
+        .yarn-spinner {
+            animation: knitInterlace 2s linear infinite;
+        }
+    </style>
+</head>
+<body class="antialiased min-h-screen flex flex-col selection:bg-brandpink selection:text-charcoal">
+
+    <!-- Top Announcement Bar -->
+    <div class="bg-gradient-to-r from-brandpink via-brandpeach to-brandmint text-charcoal text-[11px] sm:text-xs tracking-wider py-2 px-3 text-center font-medium shadow-xs">
+        🧶 Handcrafted with love • Porter Online Delivery dispatched from Nai Basti, Gurugram! 🚚✨
+    </div>
+
+    <!-- Header / Navigation -->
+    <header class="sticky top-0 z-40 bg-[#FFFDF9]/95 backdrop-blur-md border-b border-brandpink/50 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
+            
+            <!-- Brand Logo -->
+            <a href="#" class="flex items-center space-x-2.5 group">
+                <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-brandpink to-brandlavender flex items-center justify-center text-charcoal shadow-sm group-hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-yarn text-base animate-pulse"></i>
+                </div>
+                <div>
+                    <span class="text-lg sm:text-xl font-bold tracking-tight text-charcoal flex items-center gap-0.5">
+                        hooks<span class="text-pink-500">&</span>loops
+                    </span>
+                    <span class="block text-[9px] sm:text-[10px] tracking-widest uppercase text-mutedtaupe">Crochet Studio</span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation Links -->
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-mutedtaupe">
+                <a href="#shop" class="hover:text-charcoal transition-colors">Shop All</a>
+                <a href="#categories" class="hover:text-charcoal transition-colors">Categories</a>
+                <a href="#about" class="hover:text-charcoal transition-colors">Our Vibe</a>
+                <a href="#contact" class="hover:text-charcoal transition-colors">Custom Order</a>
+            </nav>
+
+            <!-- Right Actions -->
+            <div class="flex items-center space-x-2.5">
+                <button type="button" onclick="openAdminModal()" class="px-3 py-2 rounded-full bg-brandlavender hover:bg-brandpink/70 text-charcoal text-xs font-semibold transition-colors flex items-center space-x-1.5 shadow-xs cursor-pointer">
+                    <i class="fa-solid fa-lock text-[10px]"></i>
+                    <span id="admin-btn-text" class="hidden sm:inline">Admin Panel</span>
+                    <span class="sm:hidden">Admin</span>
+                </button>
+
+                <button type="button" onclick="toggleCart()" class="relative p-2.5 rounded-full bg-brandpink/60 hover:bg-brandpink transition-colors text-charcoal flex items-center space-x-1.5 shadow-xs cursor-pointer">
+                    <i class="fa-solid fa-bag-shopping text-sm sm:text-base"></i>
+                    <span id="cart-badge" class="absolute -top-1 -right-1 bg-charcoal text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center hidden">0</span>
+                    <span class="hidden sm:inline-block text-xs font-semibold pr-0.5">Cart</span>
+                </button>
+
+                <button type="button" onclick="toggleMobileMenu()" class="md:hidden p-2.5 rounded-full bg-brandmint text-charcoal cursor-pointer">
+                    <i class="fa-solid fa-bars text-sm"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Dropdown -->
+        <div id="mobile-menu" class="hidden md:hidden bg-[#FFFDF9] border-b border-brandpink px-6 py-4 space-y-3">
+            <a href="#shop" onclick="toggleMobileMenu()" class="block text-sm font-medium text-mutedtaupe hover:text-charcoal">Shop All</a>
+            <a href="#categories" onclick="toggleMobileMenu()" class="block text-sm font-medium text-mutedtaupe hover:text-charcoal">Categories</a>
+            <a href="#about" onclick="toggleMobileMenu()" class="block text-sm font-medium text-mutedtaupe hover:text-charcoal">Our Vibe</a>
+            <a href="#contact" onclick="toggleMobileMenu()" class="block text-sm font-medium text-mutedtaupe hover:text-charcoal">Custom Order</a>
+        </div>
+    </header>
+
+    <!-- Main Dynamic Container -->
+    <div id="app-view" class="flex-grow flex flex-col">
+        
+        <!-- ================= STOREFRONT VIEW ================= -->
+        <div id="storefront-view" class="flex flex-col flex-grow">
+            
+            <!-- Hero Section -->
+            <section class="relative py-12 sm:py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12 overflow-hidden w-full">
+                <div class="max-w-xl text-center md:text-left space-y-5 z-10">
+                    <div class="inline-flex items-center space-x-2 bg-brandmint px-3.5 py-1.5 rounded-full text-xs font-semibold text-charcoal uppercase tracking-wider shadow-xs">
+                        <i class="fa-solid fa-sparkles text-emerald-600"></i> Minimal Aesthetic Crochet Artistry
+                    </div>
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-charcoal leading-tight">
+                        Handmade warmth by <span class="bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 bg-clip-text text-transparent">hooks&loops</span>
+                    </h1>
+                    <p class="text-mutedtaupe text-sm sm:text-lg font-light leading-relaxed">
+                        Discover gorgeous crochet hairbands, aesthetic keychains, individual everlasting flowers, and stunning bouquets. Handcrafted with precision.
+                    </p>
+                    <div class="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-3.5 pt-2">
+                        <a href="#shop" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-charcoal text-white text-xs sm:text-sm font-medium hover:bg-mutedtaupe transition-colors text-center shadow-md">
+                            Shop Catalog
+                        </a>
+                        <a href="#contact" class="w-full sm:w-auto px-7 py-3.5 rounded-full bg-brandpeach text-charcoal text-xs sm:text-sm font-medium hover:bg-brandpink transition-colors text-center shadow-xs">
+                            Custom Order
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Floating Hero Card (Fully Controllable from Admin Panel) -->
+                <div class="w-full md:w-1/2 flex justify-center relative">
+                    <div class="absolute -top-6 -left-4 w-20 h-20 bg-brandpink rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+                    <div class="absolute -bottom-6 -right-4 w-24 h-24 bg-brandlavender rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
+                    
+                    <div id="floating-banner-card" class="relative w-full max-w-sm sm:max-w-md aspect-square rounded-3xl overflow-hidden bg-gradient-to-br from-brandpink/40 to-brandlavender/50 shadow-xl border-4 border-white flex items-center justify-center animate-float p-6 text-center bg-cover bg-center transition-all">
+                        <div id="banner-overlay-bg" class="absolute inset-0 bg-white/75 backdrop-blur-xs z-0 hidden"></div>
+                        
+                        <div class="relative z-10 space-y-3">
+                            <div id="banner-icon-container" class="w-16 h-16 mx-auto rounded-full bg-white/90 flex items-center justify-center text-pink-500 text-2xl shadow-sm">
+                                <i id="banner-card-icon" class="fa-solid fa-yarn animate-spin" style="animation-duration: 8s;"></i>
+                            </div>
+                            <h3 id="hero-banner-title" class="font-bold text-charcoal text-lg">Welcome to hooks&loops</h3>
+                            <p id="hero-banner-desc" class="text-xs text-mutedtaupe">Open the Admin Panel to list your items and photos!</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Main Shop Section with Search & Categories -->
+            <main id="shop" class="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full">
+                
+                <div class="text-center max-w-2xl mx-auto mb-8 space-y-2">
+                    <h2 class="text-2xl sm:text-3xl font-bold text-charcoal tracking-tight">Curated Creations</h2>
+                    <p class="text-xs sm:text-sm text-mutedtaupe">Search by product name or filter categories below.</p>
+                </div>
+
+                <!-- Search Bar & Controls -->
+                <div class="bg-gradient-to-r from-brandpink/20 via-brandpeach/20 to-brandmint/20 p-4 sm:p-6 rounded-3xl mb-6 border border-brandpink/50 shadow-sm space-y-3 sm:space-y-4">
+                    <div class="relative max-w-2xl mx-auto">
+                        <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-mutedtaupe">
+                            <i class="fa-solid fa-magnifying-glass text-xs sm:text-sm"></i>
+                        </span>
+                        <input 
+                            type="text" 
+                            id="search-input" 
+                            oninput="filterProducts()" 
+                            placeholder="Search by product name..." 
+                            class="w-full pl-10 pr-9 py-3 bg-white rounded-2xl border border-brandpink text-charcoal text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 transition-all placeholder:text-mutedtaupe/70 shadow-inner"
+                        >
+                        <button type="button" id="clear-search" onclick="clearSearch()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-mutedtaupe hover:text-charcoal hidden cursor-pointer">
+                            <i class="fa-solid fa-circle-xmark"></i>
+                        </button>
+                    </div>
+
+                    <!-- Category Filter Pills -->
+                    <div id="categories" class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                        <button type="button" onclick="setCategory('All')" class="category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-charcoal text-white shadow-md cursor-pointer" data-category="All">
+                            ✨ All Items
+                        </button>
+                        <button type="button" onclick="setCategory('Hairbands')" class="category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-mutedtaupe hover:bg-brandpink/40 hover:text-charcoal border border-brandpink/60 shadow-xs cursor-pointer" data-category="Hairbands">
+                            🎀 Hairbands
+                        </button>
+                        <button type="button" onclick="setCategory('Keychains')" class="category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-mutedtaupe hover:bg-brandpink/40 hover:text-charcoal border border-brandpink/60 shadow-xs cursor-pointer" data-category="Keychains">
+                            🔑 Keychains
+                        </button>
+                        <button type="button" onclick="setCategory('Flowers')" class="category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-mutedtaupe hover:bg-brandpink/40 hover:text-charcoal border border-brandpink/60 shadow-xs cursor-pointer" data-category="Flowers">
+                            🌷 Flowers
+                        </button>
+                        <button type="button" onclick="setCategory('Bouquets')" class="category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-mutedtaupe hover:bg-brandpink/40 hover:text-charcoal border border-brandpink/60 shadow-xs cursor-pointer" data-category="Bouquets">
+                            💐 Bouquets
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between mb-5 px-1">
+                    <p id="results-count" class="text-xs text-mutedtaupe font-medium">Showing all items</p>
+                    <div id="active-tag-display" class="text-xs text-pink-600 font-semibold italic"></div>
+                </div>
+
+                <!-- Product Grid -->
+                <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic -->
+                </div>
+
+                <!-- Empty State -->
+                <div id="empty-state" class="hidden text-center py-16 space-y-3">
+                    <div class="w-14 h-14 mx-auto rounded-full bg-brandpink/40 flex items-center justify-center text-charcoal text-xl">
+                        <i class="fa-solid fa-basket-shopping"></i>
+                    </div>
+                    <h3 class="text-base font-bold text-charcoal">No items listed yet</h3>
+                    <p class="text-xs text-mutedtaupe max-w-sm mx-auto">Open the Admin Panel to add your crochet items!</p>
+                </div>
+
+            </main>
+
+            <!-- Vibe Section -->
+            <section id="about" class="bg-gradient-to-b from-brandpeach/30 to-brandlavender/30 border-t border-b border-brandpink/40 py-12 px-4 sm:px-6 lg:px-8 mt-8">
+                <div class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6 text-center md:text-left">
+                    <div class="space-y-2.5 p-6 rounded-3xl bg-white/90 border border-brandpink/50 shadow-xs">
+                        <div class="w-11 h-11 mx-auto md:mx-0 rounded-full bg-brandpink/60 flex items-center justify-center text-charcoal text-sm">
+                            <i class="fa-solid fa-heart text-pink-600"></i>
+                        </div>
+                        <h4 class="font-bold text-charcoal text-sm">Handmade With Precision</h4>
+                        <p class="text-xs text-mutedtaupe leading-relaxed">Every piece is meticulously stitched using high-grade soft cotton yarn.</p>
+                    </div>
+                    <div class="space-y-2.5 p-6 rounded-3xl bg-white/90 border border-brandpink/50 shadow-xs">
+                        <div class="w-11 h-11 mx-auto md:mx-0 rounded-full bg-brandmint flex items-center justify-center text-charcoal text-sm">
+                            <i class="fa-solid fa-location-dot text-emerald-600"></i>
+                        </div>
+                        <h4 class="font-bold text-charcoal text-sm">Nai Basti, Gurugram Studio</h4>
+                        <p class="text-xs text-mutedtaupe leading-relaxed">Dispatched directly from near Shiv Shakti High School, Nai Basti, Gurgaon.</p>
+                    </div>
+                    <div class="space-y-2.5 p-6 rounded-3xl bg-white/90 border border-brandpink/50 shadow-xs">
+                        <div class="w-11 h-11 mx-auto md:mx-0 rounded-full bg-brandlavender flex items-center justify-center text-charcoal text-sm">
+                            <i class="fa-solid fa-truck-fast text-indigo-600"></i>
+                        </div>
+                        <h4 class="font-bold text-charcoal text-sm">Automated Porter Delivery</h4>
+                        <p class="text-xs text-mutedtaupe leading-relaxed">Live GPS distance calculation for accurate Porter delivery charges in Gurgaon.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Custom Order Inquiry -->
+            <section id="contact" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 w-full">
+                <div class="bg-gradient-to-r from-brandpink/40 via-brandpeach/40 to-brandmint/40 rounded-3xl p-6 sm:p-10 border border-brandpink shadow-sm text-center space-y-5">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-charcoal bg-white px-3 py-1 rounded-full shadow-xs">Made to Order</span>
+                    <h3 class="text-2xl sm:text-3xl font-bold text-charcoal">Custom Crochet Requests?</h3>
+                    <p class="text-xs sm:text-sm text-mutedtaupe max-w-xl mx-auto leading-relaxed">
+                        Need specific color schemes for bouquets, matching headbands, or personalized gifts? Reach out directly!
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-3 pt-1">
+                        <a href="https://wa.me/918076128656?text=HI%20,%20I%20HAVE%20PLACE%20D%20AN%20ORDER%20,%20CAN%20I%20GET%20MY%20PAYMENT%20RECEIPT" target="_blank" class="w-full sm:w-auto px-7 py-3 rounded-full bg-[#25D366] text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 shadow-md">
+                            <i class="fa-brands fa-whatsapp text-base"></i>
+                            <span>Chat on WhatsApp (8076128656)</span>
+                        </a>
+                        <a href="https://instagram.com/hoops&loops.creation" target="_blank" class="w-full sm:w-auto px-7 py-3 rounded-full bg-gradient-to-r from-[#833ab4] via-[#fd1d1d] to-[#fcb045] text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 shadow-md">
+                            <i class="fa-brands fa-instagram text-base"></i>
+                            <span>Message on Instagram (@hoops&loops.creation)</span>
+                        </a>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- ================= ADMIN PANEL VIEW ================= -->
+        <div id="admin-view" class="hidden flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-6">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-gradient-to-r from-brandlavender/60 to-brandpink/40 p-5 sm:p-6 rounded-3xl border border-brandpink shadow-xs">
+                <div>
+                    <div class="inline-flex items-center space-x-2 bg-charcoal text-white px-3 py-1 rounded-full text-xs font-semibold mb-2">
+                        <i class="fa-solid fa-shield-halved text-brandpink"></i> Admin Dashboard
+                    </div>
+                    <h2 class="text-xl sm:text-2xl font-bold text-charcoal">Manage hooks&loops Catalog & Orders</h2>
+                    <p class="text-xs text-mutedtaupe mt-1">Control floating hero card image/text, manage catalog items, or view pending orders.</p>
+                </div>
+                <button type="button" onclick="exitAdminMode()" class="px-4 py-2 rounded-full bg-white text-charcoal font-semibold text-xs border border-brandpink shadow-sm hover:bg-brandpink/30 transition-colors w-full sm:w-auto text-center cursor-pointer">
+                    <i class="fa-solid fa-arrow-left mr-1.5"></i> Back to Storefront
+                </button>
+            </div>
+
+            <!-- Admin Tabs Navigation -->
+            <div class="flex flex-wrap border-b border-brandpink/70 gap-4">
+                <button type="button" onclick="switchAdminTab('banner')" id="tab-btn-banner" class="pb-3 px-2 font-bold text-sm text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer">
+                    🖼️ Floating Hero Banner Control
+                </button>
+                <button type="button" onclick="switchAdminTab('catalog')" id="tab-btn-catalog" class="pb-3 px-2 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition-colors cursor-pointer">
+                    📦 Manage Products (<span id="admin-product-count">0</span>)
+                </button>
+                <button type="button" onclick="switchAdminTab('orders')" id="tab-btn-orders" class="pb-3 px-2 font-bold text-sm text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer">
+                    📋 Pending Orders (<span id="admin-order-count">0</span>)
+                </button>
+            </div>
+
+            <!-- TAB 0: FLOATING HERO BANNER CONTROL -->
+            <div id="admin-tab-banner" class="hidden space-y-6">
+                <div class="bg-white p-5 sm:p-8 rounded-3xl border border-brandpink/80 shadow-sm space-y-5">
+                    <h3 class="text-base sm:text-lg font-bold text-charcoal flex items-center gap-2 border-b border-brandpink/50 pb-3">
+                        <i class="fa-solid fa-image text-pink-500"></i> Customize Floating Hero Card Image & Text
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Hero Card Title *</label>
+                            <input type="text" id="hero-title-input" placeholder="e.g., Welcome to hooks&loops" class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Hero Card Description *</label>
+                            <textarea id="hero-desc-input" rows="2" placeholder="Description text..." class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5"></textarea>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Hero Card Background Image (Select from PC/Gallery)</label>
+                            <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl border-2 border-dashed border-brandpink bg-brandpink/5">
+                                <input type="file" id="hero-image-file" accept="image/*" onchange="previewHeroImage(event)" class="w-full text-xs text-mutedtaupe file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-charcoal file:text-white hover:file:bg-mutedtaupe cursor-pointer">
+                                <input type="hidden" id="hero-image-base64" value="">
+                                <div id="hero-preview-box" class="w-16 h-16 rounded-xl overflow-hidden bg-brandpink/20 shrink-0 border border-brandpink flex items-center justify-center">
+                                    <span id="hero-preview-placeholder" class="text-[9px] text-mutedtaupe text-center p-1">No Image</span>
+                                    <img id="hero-preview-img" src="" alt="Hero Card" class="w-full h-full object-cover hidden">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3 pt-2">
+                            <button type="button" onclick="saveHeroBannerSettings()" class="px-7 py-3 rounded-full bg-charcoal text-white text-xs font-semibold hover:bg-mutedtaupe transition-colors shadow-md cursor-pointer">
+                                Save & Update Hero Card
+                            </button>
+                            <button type="button" onclick="removeHeroImage()" class="px-5 py-3 rounded-full bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200 transition-colors cursor-pointer">
+                                Remove Card Image
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 1: CATALOG MANAGEMENT -->
+            <div id="admin-tab-catalog" class="space-y-6">
+                <!-- Add / Edit Form -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl border border-brandpink/80 shadow-sm space-y-5">
+                    <div class="flex items-center justify-between border-b border-brandpink/50 pb-3">
+                        <h3 id="form-title" class="text-base sm:text-lg font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-circle-plus text-pink-500"></i> Add New Crochet Item
+                        </h3>
+                        <button type="button" id="cancel-edit-btn" onclick="resetProductForm()" class="text-xs text-mutedtaupe hover:text-charcoal hidden underline cursor-pointer">
+                            Cancel Edit
+                        </button>
+                    </div>
+
+                    <form id="product-form" onsubmit="handleProductSubmit(event)" class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <input type="hidden" id="edit-product-id" value="">
+                        
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Product Name *</label>
+                            <input type="text" id="p-name" required placeholder="e.g., Pastel Daisy Hairband" class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Category *</label>
+                            <select id="p-category" required class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+                                <option value="Hairbands">Hairbands</option>
+                                <option value="Keychains">Keychains</option>
+                                <option value="Flowers">Flowers</option>
+                                <option value="Bouquets">Bouquets</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Price (₹) *</label>
+                            <input type="number" id="p-price" required min="1" placeholder="e.g., 349" class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+                        </div>
+
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Stock Status *</label>
+                            <select id="p-stock" required class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+                                <option value="In Stock">In Stock (Ready to ship)</option>
+                                <option value="Made to Order">Made to Order (2-3 days)</option>
+                                <option value="Out of Stock">Out of Stock</option>
+                            </select>
+                        </div>
+
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Product Image (Select from Gallery / Camera) *</label>
+                            <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl border-2 border-dashed border-brandpink bg-brandpink/5">
+                                <input type="file" id="p-image-file" accept="image/*" onchange="previewUploadedImage(event)" class="w-full text-xs text-mutedtaupe file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-charcoal file:text-white hover:file:bg-mutedtaupe cursor-pointer">
+                                <input type="hidden" id="p-image-base64" required value="">
+                                <div id="image-preview-container" class="w-16 h-16 rounded-xl overflow-hidden bg-brandpink/20 shrink-0 border border-brandpink flex items-center justify-center">
+                                    <span id="preview-placeholder" class="text-[10px] text-mutedtaupe text-center p-1">No Image</span>
+                                    <img id="preview-img" src="" alt="Preview" class="w-full h-full object-cover hidden">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="md:col-span-2 space-y-1.5">
+                            <label class="block text-xs font-bold text-charcoal uppercase tracking-wider">Description *</label>
+                            <textarea id="p-desc" required rows="3" placeholder="Describe the item details..." class="w-full px-4 py-3 rounded-2xl border border-brandpink/80 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5"></textarea>
+                        </div>
+
+                        <div class="md:col-span-2 flex justify-end gap-3 pt-2">
+                            <button type="submit" id="form-submit-btn" class="w-full sm:w-auto px-7 py-3 rounded-full bg-charcoal text-white text-xs font-semibold hover:bg-mutedtaupe transition-colors shadow-md text-center cursor-pointer">
+                                Save Product to Catalog
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Existing Inventory List -->
+                <div class="bg-white p-5 sm:p-8 rounded-3xl border border-brandpink/80 shadow-sm space-y-4">
+                    <h3 class="text-base sm:text-lg font-bold text-charcoal">Existing Inventory Items</h3>
+                    <div id="admin-products-list" class="divide-y divide-brandpink/50">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: PENDING ORDERS -->
+            <div id="admin-tab-orders" class="hidden space-y-6">
+                <div class="bg-white p-5 sm:p-8 rounded-3xl border border-brandpink/80 shadow-sm space-y-4">
+                    <div class="flex items-center justify-between border-b border-brandpink/50 pb-3">
+                        <h3 class="text-base sm:text-lg font-bold text-charcoal flex items-center gap-2">
+                            <i class="fa-solid fa-clipboard-list text-pink-500"></i> Customer Checkout Orders
+                        </h3>
+                        <button type="button" onclick="clearAllOrders()" class="text-xs text-red-600 hover:text-red-800 underline cursor-pointer">
+                            Clear All Orders
+                        </button>
+                    </div>
+                    <div id="admin-orders-list" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-brandpink/60 py-10 px-4 sm:px-6 lg:px-8 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-5 text-center md:text-left">
+            <div>
+                <span class="text-base sm:text-lg font-bold tracking-tight text-charcoal flex items-center justify-center md:justify-start gap-1">
+                    hooks<span class="text-pink-500">&</span>loops
+                </span>
+                <p class="text-xs text-mutedtaupe mt-1">Handmade crochet essentials. Dispatch from Nai Basti, Gurugram.</p>
+            </div>
+            <div class="flex space-x-6 text-mutedtaupe text-xs sm:text-sm font-medium">
+                <a href="#shop" class="hover:text-charcoal transition-colors">Shop</a>
+                <a href="#about" class="hover:text-charcoal transition-colors">Vibe</a>
+                <a href="#contact" class="hover:text-charcoal transition-colors">Custom Orders</a>
+            </div>
+            <p class="text-xs text-mutedtaupe">© 2026 hooks&loops Studio. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Slide-out Shopping Cart Drawer with Yarn Animation -->
+    <div id="cart-drawer-overlay" class="fixed inset-0 bg-charcoal/40 backdrop-blur-xs z-50 hidden transition-opacity" onclick="toggleCart()"></div>
+    
+    <div id="cart-drawer" class="fixed inset-y-0 right-0 max-w-md w-full bg-[#FFFDF9] shadow-2xl z-50 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        
+        <!-- Cart Header -->
+        <div class="p-5 sm:p-6 border-b border-brandpink/60 flex items-center justify-between bg-gradient-to-r from-brandpink/30 to-brandlavender/30">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white flex items-center justify-center text-pink-500 shadow-xs relative shrink-0">
+                    <i class="fa-solid fa-yarn yarn-spinner text-base"></i>
+                </div>
+                <div>
+                    <h3 class="font-bold text-charcoal text-sm sm:text-base">Your Crochet Bag</h3>
+                    <span id="cart-item-count" class="text-xs text-mutedtaupe">(0 items)</span>
+                </div>
+            </div>
+            <button type="button" onclick="toggleCart()" class="p-2 rounded-full hover:bg-brandpink/50 text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Cart Items List -->
+        <div id="cart-items-container" class="flex-grow overflow-y-auto p-5 sm:p-6 space-y-4 divide-y divide-brandpink/40">
+            <!-- Populated by JS -->
+        </div>
+
+        <!-- Empty Cart -->
+        <div id="cart-empty-state" class="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-3">
+            <div class="w-14 h-14 rounded-full bg-brandpink/40 flex items-center justify-center text-charcoal text-xl">
+                <i class="fa-solid fa-basket-shopping"></i>
+            </div>
+            <h4 class="font-bold text-charcoal text-sm">Your bag is empty</h4>
+            <p class="text-xs text-mutedtaupe">Add handmade crochet treasures to start your order.</p>
+            <button type="button" onclick="toggleCart()" class="mt-1 px-6 py-2.5 rounded-full bg-charcoal text-white text-xs font-semibold hover:bg-mutedtaupe transition-colors shadow-md cursor-pointer">
+                Start Shopping
+            </button>
+        </div>
+
+        <!-- Checkout / City Selection Delivery Footer -->
+        <div id="cart-footer" class="p-5 sm:p-6 border-t border-brandpink/60 bg-gradient-to-t from-brandpink/20 to-white space-y-3.5 hidden">
+            
+            <!-- City Selection & Address Card -->
+            <div class="space-y-2.5 bg-white p-3.5 rounded-2xl border border-brandpink/70 shadow-xs">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-city text-pink-500"></i> Select Delivery City (Gurgaon Only)
+                    </h4>
+                </div>
+                
+                <select id="buyer-city" onchange="validateCityDelivery()" class="w-full px-3 py-2 rounded-xl border border-brandpink text-xs font-semibold text-charcoal focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5 cursor-pointer">
+                    <option value="">-- Choose Your City --</option>
+                    <option value="Gurgaon">Gurgaon (Gurugram)</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Noida">Noida</option>
+                    <option value="Faridabad">Faridabad</option>
+                    <option value="Ghaziabad">Ghaziabad</option>
+                    <option value="Other">Other City</option>
+                </select>
+
+                <div class="flex items-center justify-between pt-1">
+                    <h4 class="text-xs font-bold text-charcoal uppercase tracking-wider flex items-center gap-1.5">
+                        <i class="fa-solid fa-location-crosshairs text-pink-500"></i> Location / Landmark
+                    </h4>
+                    <button type="button" onclick="fetchCustomerLocation()" class="px-3 py-1.5 rounded-full bg-brandlavender text-charcoal text-[11px] font-semibold hover:bg-brandpink transition-colors flex items-center gap-1 shadow-xs cursor-pointer">
+                        <i class="fa-solid fa-crosshairs"></i> Use GPS
+                    </button>
+                </div>
+                
+                <input type="text" id="buyer-address" placeholder="Enter street/landmark or click GPS..." class="w-full px-3 py-2 rounded-xl border border-brandpink text-xs focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+                
+                <div id="location-status" class="text-[11px] text-mutedtaupe italic">
+                    Pickup: 578/16 Nai Basti, Gurugram (near Shiv Shakti High School)
+                </div>
+            </div>
+
+            <!-- Delivery Block Notice (Non-Gurgaon) -->
+            <div id="delivery-error-box" class="hidden p-3 rounded-xl bg-red-50 border border-red-200 text-red-600 text-xs font-semibold flex items-center space-x-2">
+                <i class="fa-solid fa-triangle-exclamation text-sm shrink-0"></i>
+                <span id="delivery-error-text">Delivery is available strictly within Gurgaon only!</span>
+            </div>
+
+            <!-- Calculations -->
+            <div id="summary-section" class="space-y-1">
+                <div class="flex justify-between text-xs text-mutedtaupe">
+                    <span>Subtotal</span>
+                    <span id="cart-subtotal">₹0</span>
+                </div>
+                <div class="flex justify-between text-xs text-mutedtaupe">
+                    <span>Porter Delivery Fee (<span id="calc-distance">0 km</span>)</span>
+                    <span id="porter-fee" class="font-semibold text-charcoal">₹40</span>
+                </div>
+                <div class="flex justify-between text-sm font-bold text-charcoal pt-2 border-t border-brandpink/60">
+                    <span>Total Estimate</span>
+                    <span id="cart-total" class="text-base text-pink-600">₹0</span>
+                </div>
+            </div>
+
+            <!-- Checkout Button (WhatsApp Only) -->
+            <div id="checkout-buttons" class="space-y-2 pt-1">
+                <button type="button" onclick="completeWebsiteCheckout()" class="w-full py-3.5 px-4 rounded-full bg-[#25D366] text-white text-xs font-bold hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 shadow-md cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span>Checkout via WhatsApp</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Success Modal with WhatsApp Action -->
+    <div id="success-modal" class="fixed inset-0 bg-charcoal/60 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-md w-full p-6 sm:p-8 rounded-3xl shadow-2xl border border-brandpink space-y-5 text-center">
+            <div class="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-2xl shadow-inner">
+                <i class="fa-solid fa-circle-check"></i>
+            </div>
+            <div class="space-y-1.5">
+                <h3 class="font-bold text-charcoal text-lg">Order Placed Successfully!</h3>
+                <p class="text-xs text-mutedtaupe leading-relaxed">
+                    Your order has been logged in the admin panel. Click below to message us on WhatsApp and get your payment receipt:
+                </p>
+            </div>
+            
+            <div class="space-y-2.5 pt-1">
+                <a id="whatsapp-success-link" href="#" target="_blank" class="w-full py-3.5 px-4 rounded-full bg-[#25D366] text-white text-xs font-semibold hover:opacity-90 transition-opacity flex items-center justify-center space-x-2 shadow-md">
+                    <i class="fa-brands fa-whatsapp text-base"></i>
+                    <span>Chat on WhatsApp (8076128656)</span>
+                </a>
+            </div>
+
+            <button type="button" onclick="closeSuccessModal()" class="text-xs text-mutedtaupe hover:text-charcoal underline pt-2 cursor-pointer">
+                Back to Storefront
+            </button>
+        </div>
+    </div>
+
+    <!-- Admin PIN Modal -->
+    <div id="admin-modal" class="fixed inset-0 bg-charcoal/50 backdrop-blur-xs z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white max-w-sm w-full p-6 rounded-3xl shadow-2xl border border-brandpink space-y-4 text-center">
+            <div class="w-12 h-12 rounded-full bg-brandlavender mx-auto flex items-center justify-center text-charcoal">
+                <i class="fa-solid fa-lock text-sm"></i>
+            </div>
+            <h3 class="font-bold text-charcoal text-base">Admin Access</h3>
+            <p class="text-xs text-mutedtaupe">Enter admin passcode to manage hero card, products & orders.</p>
+            <input type="password" id="admin-pin-input" placeholder="Enter passcode" class="w-full px-4 py-3 rounded-2xl border border-brandpink text-center text-xs font-bold tracking-widest focus:outline-none focus:ring-2 focus:ring-pink-400 bg-brandpink/5">
+            <div class="flex gap-2 pt-1">
+                <button type="button" onclick="closeAdminModal()" class="flex-1 py-2.5 rounded-full bg-brandpink/40 text-charcoal font-semibold text-xs hover:bg-brandpink transition-colors cursor-pointer">Cancel</button>
+                <button type="button" onclick="verifyAdminPin()" class="flex-1 py-2.5 rounded-full bg-charcoal text-white font-semibold text-xs hover:bg-mutedtaupe transition-colors shadow-md cursor-pointer">Login</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-charcoal text-white px-5 py-3 rounded-2xl text-xs font-semibold shadow-xl z-50 flex items-center space-x-3 transition-all duration-300 translate-y-20 opacity-0 pointer-events-none">
+        <i class="fa-solid fa-circle-check text-brandmint"></i>
+        <span id="toast-message">Notification</span>
+    </div>
+
+    <!-- Application Script -->
+    <script>
+        const PICKUP_LAT = 28.4595;
+        const PICKUP_LNG = 77.0266;
+
+        let products = JSON.parse(localStorage.getItem('hooks_loops_products')) || [];
+        let orders = JSON.parse(localStorage.getItem('hooks_loops_orders')) || [];
+        let heroTitle = localStorage.getItem('hooks_loops_hero_title') || "Welcome to hooks&loops";
+        let heroDesc = localStorage.getItem('hooks_loops_hero_desc') || "Open the Admin Panel to list your items and photos!";
+        let heroImg = localStorage.getItem('hooks_loops_hero_img') || "";
+        let cart = [];
+        let currentCategory = 'All';
+        let searchQuery = '';
+        let isAdminLoggedIn = false;
+        let customerLat = null;
+        let customerLng = null;
+        let calculatedDistanceKm = 2.5;
+
+        const productGrid = document.getElementById('product-grid');
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const resultsCount = document.getElementById('results-count');
+        const emptyState = document.getElementById('empty-state');
+        const cartBadge = document.getElementById('cart-badge');
+        const cartDrawer = document.getElementById('cart-drawer');
+        const cartOverlay = document.getElementById('cart-drawer-overlay');
+        const cartItemsContainer = document.getElementById('cart-items-container');
+        const cartEmptyState = document.getElementById('cart-empty-state');
+        const cartFooter = document.getElementById('cart-footer');
+        const cartItemCount = document.getElementById('cart-item-count');
+        const cartSubtotal = document.getElementById('cart-subtotal');
+        const cartTotal = document.getElementById('cart-total');
+        const activeTagDisplay = document.getElementById('active-tag-display');
+        const storefrontView = document.getElementById('storefront-view');
+        const adminView = document.getElementById('admin-view');
+
+        window.onload = function() {
+            applyHeroSettings();
+            document.getElementById('hero-title-input').value = heroTitle;
+            document.getElementById('hero-desc-input').value = heroDesc;
+            if (heroImg) {
+                document.getElementById('hero-image-base64').value = heroImg;
+                const prevImg = document.getElementById('hero-preview-img');
+                const prevPh = document.getElementById('hero-preview-placeholder');
+                prevImg.src = heroImg;
+                prevImg.classList.remove('hidden');
+                prevPh.classList.add('hidden');
+            }
+            renderProducts(products);
+            renderAdminProducts();
+            renderAdminOrders();
+        };
+
+        function applyHeroSettings() {
+            const cardEl = document.getElementById('floating-banner-card');
+            const titleEl = document.getElementById('hero-banner-title');
+            const descEl = document.getElementById('hero-banner-desc');
+            const overlayEl = document.getElementById('banner-overlay-bg');
+            const iconContainer = document.getElementById('banner-icon-container');
+
+            titleEl.textContent = heroTitle;
+            descEl.textContent = heroDesc;
+
+            if (heroImg) {
+                cardEl.style.backgroundImage = `url('${heroImg}')`;
+                overlayEl.classList.remove('hidden');
+                iconContainer.classList.add('shadow-md');
+            } else {
+                cardEl.style.backgroundImage = 'none';
+                overlayEl.classList.add('hidden');
+            }
+        }
+
+        function previewHeroImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64Str = e.target.result;
+                document.getElementById('hero-image-base64').value = base64Str;
+                
+                const prevImg = document.getElementById('hero-preview-img');
+                const prevPh = document.getElementById('hero-preview-placeholder');
+                prevImg.src = base64Str;
+                prevImg.classList.remove('hidden');
+                prevPh.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function removeHeroImage() {
+            heroImg = "";
+            document.getElementById('hero-image-base64').value = "";
+            document.getElementById('hero-image-file').value = "";
+            document.getElementById('hero-preview-img').src = "";
+            document.getElementById('hero-preview-img').classList.add('hidden');
+            document.getElementById('hero-preview-placeholder').classList.remove('hidden');
+            localStorage.removeItem('hooks_loops_hero_img');
+            applyHeroSettings();
+            showToast("Hero card image removed");
+        }
+
+        function saveHeroBannerSettings() {
+            const tVal = document.getElementById('hero-title-input').value.trim();
+            const dVal = document.getElementById('hero-desc-input').value.trim();
+            const iVal = document.getElementById('hero-image-base64').value;
+
+            if (!tVal || !dVal) {
+                showToast("Title and description cannot be empty!");
+                return;
+            }
+
+            heroTitle = tVal;
+            heroDesc = dVal;
+            heroImg = iVal;
+
+            localStorage.setItem('hooks_loops_hero_title', heroTitle);
+            localStorage.setItem('hooks_loops_hero_desc', heroDesc);
+            if (heroImg) {
+                localStorage.setItem('hooks_loops_hero_img', heroImg);
+            } else {
+                localStorage.removeItem('hooks_loops_hero_img');
+            }
+
+            applyHeroSettings();
+            showToast("Floating hero card updated successfully!");
+        }
+
+        function saveProductsToStorage() {
+            localStorage.setItem('hooks_loops_products', JSON.stringify(products));
+        }
+
+        function saveOrdersToStorage() {
+            localStorage.setItem('hooks_loops_orders', JSON.stringify(orders));
+        }
+
+        function renderProducts(itemsToRender) {
+            productGrid.innerHTML = '';
+            
+            if (itemsToRender.length === 0) {
+                emptyState.classList.remove('hidden');
+                resultsCount.textContent = `Showing 0 items`;
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            resultsCount.textContent = `Showing ${itemsToRender.length} item${itemsToRender.length > 1 ? 's' : ''}`;
+
+            itemsToRender.forEach(product => {
+                const card = document.createElement('div');
+                card.className = "group bg-white rounded-3xl overflow-hidden border border-brandpink/70 hover:shadow-xl transition-all duration-300 flex flex-col justify-between";
+                
+                const stockBadgeColor = product.stock === 'In Stock' ? 'bg-emerald-100 text-emerald-800' : product.stock === 'Made to Order' ? 'bg-amber-100 text-amber-800' : 'bg-red-100 text-red-800';
+
+                card.innerHTML = `
+                    <div>
+                        <div class="relative aspect-square overflow-hidden bg-brandpink/20">
+                            <img src="${product.image}" alt="${product.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=500&q=80'">
+                            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-charcoal text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-xs">
+                                ${product.category}
+                            </span>
+                            <span class="absolute top-3 right-3 ${stockBadgeColor} text-[9px] font-bold px-2 py-0.5 rounded-full shadow-xs">
+                                ${product.stock}
+                            </span>
+                        </div>
+                        <div class="p-4 sm:p-5 space-y-1.5">
+                            <h3 class="font-bold text-charcoal text-sm sm:text-base group-hover:text-pink-600 transition-colors">${product.name}</h3>
+                            <p class="text-xs text-mutedtaupe line-clamp-2 font-light leading-relaxed">${product.description}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 sm:p-5 pt-0 flex items-center justify-between mt-3">
+                        <span class="text-sm sm:text-base font-extrabold text-charcoal">₹${product.price}</span>
+                        <button type="button" onclick="addToCart(${product.id})" class="px-3.5 py-2 rounded-full bg-charcoal text-white text-xs font-semibold hover:bg-mutedtaupe transition-colors flex items-center space-x-1.5 shadow-md cursor-pointer">
+                            <i class="fa-solid fa-plus text-[10px]"></i>
+                            <span>Add</span>
+                        </button>
+                    </div>
+                `;
+                productGrid.appendChild(card);
+            });
+        }
+
+        function filterProducts() {
+            searchQuery = searchInput.value.toLowerCase().trim();
+            
+            if (searchQuery.length > 0) {
+                clearSearchBtn.classList.remove('hidden');
+            } else {
+                clearSearchBtn.classList.add('hidden');
+            }
+
+            const filtered = products.filter(product => {
+                const matchesCategory = currentCategory === 'All' || product.category === currentCategory;
+                const matchesSearch = product.name.toLowerCase().includes(searchQuery) || 
+                                      product.category.toLowerCase().includes(searchQuery) ||
+                                      product.description.toLowerCase().includes(searchQuery);
+                return matchesCategory && matchesSearch;
+            });
+
+            renderProducts(filtered);
+        }
+
+        function setCategory(category) {
+            currentCategory = category;
+            
+            document.querySelectorAll('.category-btn').forEach(btn => {
+                if (btn.dataset.category === category) {
+                    btn.className = "category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-charcoal text-white shadow-md cursor-pointer";
+                } else {
+                    btn.className = "category-btn px-4 py-2 rounded-full text-xs font-semibold transition-all bg-white text-mutedtaupe hover:bg-brandpink/40 hover:text-charcoal border border-brandpink/60 shadow-xs cursor-pointer";
+                }
+            });
+
+            if (category !== 'All') {
+                activeTagDisplay.textContent = `Category: ${category}`;
+            } else {
+                activeTagDisplay.textContent = '';
+            }
+
+            filterProducts();
+        }
+
+        function clearSearch() {
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            filterProducts();
+            searchInput.focus();
+        }
+
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingItem = cart.find(item => item.id === productId);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartUI();
+            showToast(`Added ${product.name} to your bag`);
+        }
+
+        function updateQuantity(productId, change) {
+            const item = cart.find(i => i.id === productId);
+            if (!item) return;
+
+            item.quantity += change;
+            if (item.quantity <= 0) {
+                cart = cart.filter(i => i.id !== productId);
+            }
+
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+            
+            if (totalItemsCount > 0) {
+                cartBadge.textContent = totalItemsCount;
+                cartBadge.classList.remove('hidden');
+            } else {
+                cartBadge.classList.add('hidden');
+            }
+
+            cartItemCount.textContent = `(${totalItemsCount} item${totalItemsCount !== 1 ? 's' : ''})`;
+
+            if (cart.length === 0) {
+                cartEmptyState.style.display = 'flex';
+                cartItemsContainer.innerHTML = '';
+                cartFooter.classList.add('hidden');
+                return;
+            }
+
+            cartEmptyState.style.display = 'none';
+            cartFooter.classList.remove('hidden');
+
+            cartItemsContainer.innerHTML = '';
+            let subtotal = 0;
+
+            cart.forEach(item => {
+                subtotal += item.price * item.quantity;
+                const itemEl = document.createElement('div');
+                itemEl.className = "py-3.5 flex items-center justify-between gap-3 first:pt-0 last:pb-0";
+                itemEl.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${item.image}" alt="${item.name}" class="w-12 h-12 object-cover rounded-xl bg-brandpink/25 shrink-0" onerror="this.src='https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80'">
+                        <div>
+                            <h4 class="text-xs font-bold text-charcoal">${item.name}</h4>
+                            <p class="text-[11px] text-mutedtaupe mt-0.5">₹${item.price} each</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2.5 shrink-0">
+                        <div class="flex items-center border border-brandpink rounded-full bg-white shadow-xs">
+                            <button type="button" onclick="updateQuantity(${item.id}, -1)" class="w-6 h-6 flex items-center justify-center text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer">
+                                <i class="fa-solid fa-minus text-[9px]"></i>
+                            </button>
+                            <span class="text-xs font-bold text-charcoal px-1.5">${item.quantity}</span>
+                            <button type="button" onclick="updateQuantity(${item.id}, 1)" class="w-6 h-6 flex items-center justify-center text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer">
+                                <i class="fa-solid fa-plus text-[9px]"></i>
+                            </button>
+                        </div>
+                        <span class="text-xs font-extrabold text-charcoal w-12 text-right">₹${item.price * item.quantity}</span>
+                    </div>
+                `;
+                cartItemsContainer.appendChild(itemEl);
+            });
+
+            cartSubtotal.textContent = `₹${subtotal}`;
+            calculatePorterDeliveryFee();
+            validateCityDelivery();
+        }
+
+        function validateCityDelivery() {
+            const citySelect = document.getElementById('buyer-city').value;
+            const errorBox = document.getElementById('delivery-error-box');
+            const errorText = document.getElementById('delivery-error-text');
+            const checkoutButtons = document.getElementById('checkout-buttons');
+
+            if (citySelect && citySelect !== 'Gurgaon') {
+                errorBox.classList.remove('hidden');
+                errorText.textContent = `Delivery is restricted to Gurgaon only! We cannot deliver to ${citySelect}.`;
+                checkoutButtons.classList.add('opacity-40', 'pointer-events-none');
+            } else {
+                errorBox.classList.add('hidden');
+                checkoutButtons.classList.remove('opacity-40', 'pointer-events-none');
+            }
+        }
+
+        function fetchCustomerLocation() {
+            const statusEl = document.getElementById('location-status');
+            const addressInput = document.getElementById('buyer-address');
+            const citySelect = document.getElementById('buyer-city');
+            
+            if (!navigator.geolocation) {
+                showToast("Geolocation is not supported by your browser");
+                return;
+            }
+
+            statusEl.textContent = "Fetching your GPS location...";
+            showToast("Accessing device GPS location...");
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    customerLat = position.coords.latitude;
+                    customerLng = position.coords.longitude;
+
+                    calculatedDistanceKm = calculateHaversineData(PICKUP_LAT, PICKUP_LNG, customerLat, customerLng);
+                    
+                    citySelect.value = "Gurgaon";
+                    validateCityDelivery();
+
+                    statusEl.textContent = `GPS locked! Distance to workshop: ${calculatedDistanceKm.toFixed(1)} km`;
+                    addressInput.value = `GPS Location (${customerLat.toFixed(4)}, ${customerLng.toFixed(4)})`;
+                    calculatePorterDeliveryFee();
+                    showToast("Location captured successfully!");
+                },
+                (error) => {
+                    console.error(error);
+                    statusEl.textContent = "GPS failed. Please select city and enter address manually.";
+                    showToast("Could not retrieve GPS.");
+                },
+                { enableHighAccuracy: true, timeout: 10000 }
+            );
+        }
+
+        function calculateHaversineData(lat1, lon1, lat2, lon2) {
+            const R = 6371;
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                      Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+
+        function getDeliveryFeeAmount() {
+            const dist = calculatedDistanceKm;
+            if (dist <= 5) return 40;
+            if (dist <= 12) return 70;
+            return 110;
+        }
+
+        function calculatePorterDeliveryFee() {
+            const porterFeeEl = document.getElementById('porter-fee');
+            const calcDistanceEl = document.getElementById('calc-distance');
+            const cartTotalEl = document.getElementById('cart-total');
+
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const dist = calculatedDistanceKm;
+
+            calcDistanceEl.textContent = `${dist.toFixed(1)} km`;
+            let deliveryFee = getDeliveryFeeAmount();
+
+            porterFeeEl.textContent = `₹${deliveryFee}`;
+            cartTotalEl.textContent = `₹${subtotal + deliveryFee}`;
+        }
+
+        function toggleCart() {
+            const isOpen = !cartDrawer.classList.contains('translate-x-full');
+            if (isOpen) {
+                cartDrawer.classList.add('translate-x-full');
+                cartOverlay.classList.add('hidden');
+                document.body.classList.remove('overflow-hidden');
+            } else {
+                cartDrawer.classList.remove('translate-x-full');
+                cartOverlay.classList.remove('hidden');
+                document.body.classList.add('overflow-hidden');
+                updateCartUI();
+            }
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('mobile-menu').classList.toggle('hidden');
+        }
+
+        function openAdminModal() {
+            if (isAdminLoggedIn) {
+                enterAdminMode();
+            } else {
+                document.getElementById('admin-modal').classList.remove('hidden');
+                document.getElementById('admin-pin-input').value = '';
+                document.getElementById('admin-pin-input').focus();
+            }
+        }
+
+        function closeAdminModal() {
+            document.getElementById('admin-modal').classList.add('hidden');
+        }
+
+        function verifyAdminPin() {
+            const pin = document.getElementById('admin-pin-input').value;
+            if (pin === 'manik93272') {
+                isAdminLoggedIn = true;
+                closeAdminModal();
+                enterAdminMode();
+                showToast("Admin access granted!");
+            } else {
+                showToast("Incorrect passcode!");
+            }
+        }
+
+        function enterAdminMode() {
+            storefrontView.classList.add('hidden');
+            adminView.classList.remove('hidden');
+            document.getElementById('admin-btn-text').textContent = "Dashboard Active";
+            renderAdminProducts();
+            renderAdminOrders();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function exitAdminMode() {
+            adminView.classList.add('hidden');
+            storefrontView.classList.add('flex');
+            storefrontView.classList.remove('hidden');
+            document.getElementById('admin-btn-text').textContent = "Admin Panel";
+            renderProducts(products);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function switchAdminTab(tab) {
+            const bannerTab = document.getElementById('admin-tab-banner');
+            const catTab = document.getElementById('admin-tab-catalog');
+            const ordTab = document.getElementById('admin-tab-orders');
+            const bannerBtn = document.getElementById('tab-btn-banner');
+            const catBtn = document.getElementById('tab-btn-catalog');
+            const ordBtn = document.getElementById('tab-btn-orders');
+
+            bannerTab.classList.add('hidden');
+            catTab.classList.add('hidden');
+            ordTab.classList.add('hidden');
+            bannerBtn.className = "pb-3 px-2 font-bold text-sm text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer";
+            catBtn.className = "pb-3 px-2 font-bold text-sm text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer";
+            ordBtn.className = "pb-3 px-2 font-bold text-sm text-mutedtaupe hover:text-charcoal transition-colors cursor-pointer";
+
+            if (tab === 'banner') {
+                bannerTab.classList.remove('hidden');
+                bannerBtn.className = "pb-3 px-2 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition-colors cursor-pointer";
+            } else if (tab === 'catalog') {
+                catTab.classList.remove('hidden');
+                catBtn.className = "pb-3 px-2 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition-colors cursor-pointer";
+            } else {
+                ordTab.classList.remove('hidden');
+                ordBtn.className = "pb-3 px-2 font-bold text-sm text-pink-600 border-b-2 border-pink-500 transition-colors cursor-pointer";
+                renderAdminOrders();
+            }
+        }
+
+        function previewUploadedImage(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64String = e.target.result;
+                document.getElementById('p-image-base64').value = base64String;
+                
+                const previewImg = document.getElementById('preview-img');
+                const placeholder = document.getElementById('preview-placeholder');
+                
+                previewImg.src = base64String;
+                previewImg.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderAdminProducts() {
+            const container = document.getElementById('admin-products-list');
+            document.getElementById('admin-product-count').textContent = products.length;
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = `<p class="text-xs text-mutedtaupe py-4 text-center">No products found. Add your first item above!</p>`;
+                return;
+            }
+
+            products.forEach(p => {
+                const itemEl = document.createElement('div');
+                itemEl.className = "py-3.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 first:pt-0 last:pb-0";
+                itemEl.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <img src="${p.image}" alt="${p.name}" class="w-12 h-12 object-cover rounded-xl bg-brandpink/20 shrink-0" onerror="this.src='https://images.unsplash.com/photo-1584917865442-de89df76afd3?auto=format&fit=crop&w=300&q=80'">
+                        <div>
+                            <h4 class="text-xs font-bold text-charcoal">${p.name}</h4>
+                            <p class="text-[11px] text-mutedtaupe">${p.category} • <strong class="text-charcoal">₹${p.price}</strong> • <span class="text-pink-600">${p.stock}</span></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-2 shrink-0 w-full sm:w-auto justify-end">
+                        <button type="button" onclick="editProduct(${p.id})" class="px-3 py-1.5 rounded-full bg-brandlavender text-charcoal text-xs font-semibold hover:bg-brandpink transition-colors cursor-pointer">
+                            <i class="fa-solid fa-pen-to-square mr-1"></i> Edit
+                        </button>
+                        <button type="button" onclick="deleteProduct(${p.id})" class="px-3 py-1.5 rounded-full bg-red-100 text-red-700 text-xs font-semibold hover:bg-red-200 transition-colors cursor-pointer">
+                            <i class="fa-solid fa-trash mr-1"></i> Delete
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemEl);
+            });
+        }
+
+        function renderAdminOrders() {
+            const container = document.getElementById('admin-orders-list');
+            document.getElementById('admin-order-count').textContent = orders.length;
+            container.innerHTML = '';
+
+            if (orders.length === 0) {
+                container.innerHTML = `<p class="text-xs text-mutedtaupe py-8 text-center">No pending orders yet. Orders placed on the website will appear here instantly!</p>`;
+                return;
+            }
+
+            orders.forEach((ord, index) => {
+                const card = document.createElement('div');
+                card.className = "p-4 sm:p-5 rounded-2xl bg-brandpink/10 border border-brandpink/60 space-y-3";
+                
+                let itemsListHtml = '';
+                ord.items.forEach(i => {
+                    itemsListHtml += `<div class="text-xs text-charcoal">• ${i.name} (Qty: ${i.quantity}) - ₹${i.price * i.quantity}</div>`;
+                });
+
+                card.innerHTML = `
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 border-b border-brandpink/40 pb-2.5">
+                        <div>
+                            <span class="text-xs font-bold text-charcoal bg-white px-2.5 py-1 rounded-full border border-brandpink">Order #${ord.orderId}</span>
+                            <span class="text-[11px] text-mutedtaupe ml-2">${ord.timestamp}</span>
+                        </div>
+                        <span class="text-xs font-extrabold text-pink-600">Total: ₹${ord.total}</span>
+                    </div>
+                    <div class="space-y-1">
+                        <p class="text-xs font-bold text-charcoal uppercase tracking-wider">Ordered Items:</p>
+                        ${itemsListHtml}
+                    </div>
+                    <div class="text-xs text-mutedtaupe space-y-0.5 pt-1 border-t border-brandpink/30">
+                        <div>🏙️ <strong class="text-charcoal">City:</strong> ${ord.city}</div>
+                        <div>📍 <strong class="text-charcoal">Address:</strong> ${ord.address} (${ord.distance} km)</div>
+                        <div>🚚 <strong class="text-charcoal">Porter Fee:</strong> ₹${ord.deliveryFee}</div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function handleProductSubmit(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-product-id').value;
+            const name = document.getElementById('p-name').value;
+            const category = document.getElementById('p-category').value;
+            const price = parseFloat(document.getElementById('p-price').value);
+            const stock = document.getElementById('p-stock').value;
+            const imageBase64 = document.getElementById('p-image-base64').value;
+            const description = document.getElementById('p-desc').value;
+
+            if (editId) {
+                const index = products.findIndex(p => p.id == editId);
+                if (index !== -1) {
+                    const finalImage = imageBase64 ? imageBase64 : products[index].image;
+                    products[index] = { id: parseInt(editId), name, category, price, stock, image: finalImage, description };
+                    showToast(`Updated ${name} successfully!`);
+                }
+            } else {
+                if (!imageBase64) {
+                    showToast("Please select a product image from gallery/camera!");
+                    return;
+                }
+                const newId = products.length > 0 ? Math.max(...products.map(p => p.id)) + 1 : 1;
+                products.push({ id: newId, name, category, price, stock, image: imageBase64, description });
+                showToast(`Added ${name} to catalog!`);
+            }
+
+            saveProductsToStorage();
+            resetProductForm();
+            renderAdminProducts();
+        }
+
+        function editProduct(id) {
+            const p = products.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('edit-product-id').value = p.id;
+            document.getElementById('p-name').value = p.name;
+            document.getElementById('p-category').value = p.category;
+            document.getElementById('p-price').value = p.price;
+            document.getElementById('p-stock').value = p.stock;
+            document.getElementById('p-image-base64').value = p.image;
+            document.getElementById('p-desc').value = p.description;
+
+            const previewImg = document.getElementById('preview-img');
+            const placeholder = document.getElementById('preview-placeholder');
+            previewImg.src = p.image;
+            previewImg.classList.remove('hidden');
+            placeholder.classList.add('hidden');
+
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-pen-to-square text-indigo-500"></i> Edit Product: ${p.name}`;
+            document.getElementById('form-submit-btn').textContent = "Update Product";
+            document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function resetProductForm() {
+            document.getElementById('product-form').reset();
+            document.getElementById('edit-product-id').value = '';
+            document.getElementById('p-image-base64').value = '';
+            document.getElementById('preview-img').src = '';
+            document.getElementById('preview-img').classList.add('hidden');
+            document.getElementById('preview-placeholder').classList.remove('hidden');
+
+            document.getElementById('form-title').innerHTML = `<i class="fa-solid fa-circle-plus text-pink-500"></i> Add New Crochet Item`;
+            document.getElementById('form-submit-btn').textContent = "Save Product to Catalog";
+            document.getElementById('cancel-edit-btn').classList.add('hidden');
+        }
+
+        function deleteProduct(id) {
+            products = products.filter(p => p.id !== id);
+            saveProductsToStorage();
+            renderAdminProducts();
+            renderProducts(products);
+            showToast("Product deleted successfully");
+        }
+
+        function clearAllOrders() {
+            if (confirm("Are you sure you want to clear all pending orders?")) {
+                orders = [];
+                saveOrdersToStorage();
+                renderAdminOrders();
+                showToast("Cleared all orders");
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            toastMsg.textContent = message;
+            
+            toast.classList.remove('translate-y-20', 'opacity-0', 'pointer-events-none');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+
+        function completeWebsiteCheckout() {
+            const citySelect = document.getElementById('buyer-city').value;
+            const address = document.getElementById('buyer-address').value.trim();
+
+            if (!citySelect) {
+                showToast("Please select your delivery city!");
+                document.getElementById('buyer-city').focus();
+                return;
+            }
+
+            if (citySelect !== 'Gurgaon') {
+                showToast("Delivery is available strictly in Gurgaon only!");
+                return;
+            }
+
+            if (!address) {
+                showToast("Please enter your street address or landmark!");
+                document.getElementById('buyer-address').focus();
+                return;
+            }
+
+            if (cart.length === 0) return;
+
+            let subtotal = 0;
+            cart.forEach(item => {
+                subtotal += item.price * item.quantity;
+            });
+
+            const deliveryFee = getDeliveryFeeAmount();
+            const total = subtotal + deliveryFee;
+
+            const newOrder = {
+                orderId: Math.floor(1000 + Math.random() * 9000),
+                timestamp: new Date().toLocaleString(),
+                items: [...cart],
+                city: citySelect,
+                address: address,
+                distance: calculatedDistanceKm.toFixed(1),
+                deliveryFee: deliveryFee,
+                total: total
+            };
+
+            orders.unshift(newOrder);
+            saveOrdersToStorage();
+            renderAdminOrders();
+
+            const waText = encodeURIComponent("HI , I HAVE PLACE D AN ORDER , CAN I GET MY PAYMENT RECEIPT");
+            document.getElementById('whatsapp-success-link').href = `https://wa.me/918076128656?text=${waText}`;
+
+            cart = [];
+            updateCartUI();
+            toggleCart();
+
+            document.getElementById('success-modal').classList.remove('hidden');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
